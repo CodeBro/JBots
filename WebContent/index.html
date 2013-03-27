@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script>
+    var WIDTH = 600;
+    var HEIGHT = 400;
+    var timerOb = false;
+    
+	var c = document.getElementById("myCanvas");
+
+	var robots = new Array();
+	var particles = new Array();
+
+	function circle(ctx, r) {
+		ctx.beginPath();
+		ctx.arc(r.x, r.y, 3, 0, Math.PI * 2, true);
+		ctx.fill();
+	}
+
+	function runRobot() {
+		var c = document.getElementById("myCanvas");
+		var ctx = c.getContext("2d");
+		ctx.fillStyle = '#000000';
+		ctx.fillRect(0, 0, WIDTH, HEIGHT);
+		for (r in robots) {
+			bot = robots[r];
+			if(bot.hasOwnProperty("dead") && robots[r].dead == true)
+				{
+				ctx.fillStyle = '#ffffff';
+				circle(ctx, bot);
+				}
+			else
+				{
+				bot.run();
+				bot.x += Math.sin(bot.r)*bot.v;
+				bot.y += Math.cos(bot.r)*bot.v;
+				bot.x = Math.max(5,bot.x);
+		   		bot.y = Math.max(5,bot.y);
+		   		bot.x = Math.min(WIDTH-5,bot.x);
+		   		bot.y = Math.min(HEIGHT-5,bot.y);
+				ctx.fillStyle = robots[r].looks.fillStyle;
+				circle(ctx, robots[r]);
+				if (robots[r].hasOwnProperty("fire") && robots[r].fire == true) {
+					robots[r].fire = false;
+					particles.push({
+						r : robots[r].r,
+						x : robots[r].x,
+						y : robots[r].y
+					});
+				}
+
+			}
+		}
+		for (p in particles) {
+			var r = particles[p].r;
+			var x = particles[p].x;
+			var y = particles[p].y;
+			particles[p].x += Math.sin(r) * 5;
+			particles[p].y += Math.cos(r) * 5;
+			ctx.fillStyle = '#ffff00';
+			circle(ctx, particles[p]);
+			for( r in robots)
+				{
+				prt = particles[p];
+				bot = robots[r];
+				if(
+					(prt.x-bot.x)*(prt.x-bot.x) +
+					(prt.y-bot.y)*(prt.y-bot.y) < 3
+					)
+					{
+					clearInterval(timerOb);
+					robots[r].dead = true;
+					runRobot(); // one more time ...
+					}
+				}
+			if(particles[p].x<0 ||
+					particles[p].x>WIDTH ||
+					particles[p].y < 0 ||
+					particles[p].y > HEIGHT)
+				{
+				particles.splice(p,1);
+				}
+		}
+	}
+
+	var botinstance = function() {
+		this.x = Math.random()*WIDTH;
+		this.y = Math.random()*HEIGHT;
+		this.r = Math.random()*6.24;
+		this.v = 1;
+		this.looks = {
+			fillStyle : '#ff0000'
+		};
+		this.run = function() {
+		//	this.r += Math.random()/10;
+		}
+	};
+	
+	var loadRobot1 = function()
+	{
+		var area = document.getElementById('scriptarea');
+		var s = 'robots[1].run = ' + area.value;
+		return s;
+	}
+	
+	var loadRobot2 = function ()
+	{
+		var area = document.getElementById('scriptarea2');
+		var s = 'robots[0].run = ' + area.value;
+		return s;
+	}
+	
+	function init()
+	{
+		particles = new Array();
+		robots = new Array();
+		robots[0] = new botinstance;
+		robots[1] = new botinstance;
+
+
+		eval(loadRobot1());
+		
+		eval(loadRobot2());
+		
+		robots[1].looks.fillStyle = '#00ff00';
+
+	}
+
+	window.onload = function() {
+		var btn = document.getElementById('ubtn');
+
+		btn.onclick = function()
+		{
+			eval(loadRobot1());
+		}
+		var btn = document.getElementById('ubtn2');
+
+		btn.onclick = function()
+		{
+			eval(loadRobot2());
+		};
+		var btn = document.getElementById('start');
+
+		btn.onclick = function() {
+			init();
+			if(timerOb)
+				clearInterval(timerOb);
+			timerOb = setInterval(runRobot, 50);
+
+		};
+
+	}
+</script>
+</head>
+<body>
+<h1>Welcome to JBOT WARS!!!</h1>
+<em>Let the killing begin ... code your bot and press start</em>
+<p>
+<input type="button" value="start" id="start"/>
+	<canvas id="myCanvas" width="600" height="400"></canvas>
+<p>
+Robot1
+	<textarea rows="20" cols="40" id="scriptarea">
+	// homing robot
+function()
+{
+   var ox = robots[0].x-this.x;
+   var oy = robots[0].y-this.y;
+   
+    this.r = Math.atan2(ox,oy);
+	if(Math.random() &gt; 0.9)
+		this.fire = true;
+       this.v = .9;
+}
+
+</textarea>
+	<input type="button" value="update" id="ubtn" />
+	Robot2
+	<textarea rows="20" cols="40" id="scriptarea2">
+	// round and round shoot all the time
+function()
+{
+    this.r += Math.random()/10;
+	if(Math.random() &gt; 0.9)
+		this.fire = true;
+}
+</textarea>
+	<input type="button" value="update" id="ubtn2" />
+
+</textarea>
+<h2>Help</h2>
+Robots have six parameters:
+<ul>
+<li>x,y are location and yes, you can teleport
+<li>r is the direction of movement
+<li>v is the velosity
+<li>dead, when true means robot is now dead
+<li>fire, when true means canon should fire, it fires to the direction robot it moving
+</ul>
+<p>To see other robot you can access robots[x], where x is either 0 or 1.
+Of course you can kill the other robot by just doing <pre>robots[0].dead = true;</pre>,
+but that's not much fun is it?
+
+</body>
+</html>
