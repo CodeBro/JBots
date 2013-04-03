@@ -119,11 +119,20 @@
 		robots[0] = new botinstance;
 		robots[1] = new botinstance;
 
-
+try{
 		eval(loadRobot1());
-		
-		eval(loadRobot2());
-		
+} 
+catch(e)
+{
+	alert("robot 1 eval error");
+}
+try {
+	eval(loadRobot2());	
+} 
+catch(e)
+{
+	alert("robot 2 eval error");
+}
 		robots[1].looks.fillStyle = '#00ff00';
 
 	}
