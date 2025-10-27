@@ -6,5 +6,3 @@ JBot Wars is a simple Javascript environment where you can write a simple functi
 Its inspiration is the golden oldie crobots that I used to play in the day.
 
 Enjoy.
-
-live site: http://www.creabros.fi/jbotwars/
